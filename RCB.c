@@ -1,39 +1,37 @@
 //
 // Created by 傅康 on 2019/12/13.
 //
-#include "RCB.h"
+#include "CB.h"
 
-static pRCBList *list;
-
-static Status initRCBList(void) {
-    (*list) = (pRCBList) malloc(sizeof(RCBNode));
-    (*list)->head = 0;
-    (*list)->next = NULL;
+Status initRCBList(pRCBList *list) {
+    (*list) = (pRCBList) malloc(sizeof(RCBList));
+    (*list)->head = (pRCBNode) malloc(sizeof(RCBNode));
+    (*list)->head->next = NULL;
 }
 
-static Status insertRCB(pRCB p) {
+Status insertRCB(pRCB p, pRCBList *list) {
     RCBNode *pNode = (RCBNode *) malloc(sizeof(RCBNode));
     pNode->rcb = p;
-    if ((*list)->next == NULL) {
-        (*list)->next = pNode;
+    if (lengthRCBList(list) == 0) {
+        (*list)->head->next = pNode;
     } else {
-        pRCBNode q = (*list)->next;
-        (*list)->next = pNode;
+        pRCBNode q = (*list)->head->next;
+        (*list)->head->next = pNode;
         pNode->next = q;
     }
 }
 
-Status createRCB(pRCB *p, property ID) {
+Status createRCB(pRCB *p, property ID, pRCBList *list) {
     (*p) = (pRCB) malloc(sizeof(RCB));
     (*p)->ID = ID;
     (*p)->isUse = NOTUSING;
     createList(&((*p)->waitPList));
     //加入资源列表
-    insertRCB(*p);
+    insertRCB(*p, list);
 }
 
-Status useRCB(pPCB pcb, property RCBID) {
-    pRCB rcb = getRCBPointer(RCBID);
+Status useRCB(pPCB pcb, property RCBID, pRCBList *list) {
+    pRCB rcb = getRCBPointer(RCBID, list);
     if (rcb->isUse == USING) {
         insertList(&(rcb->waitPList), pcb->ID);
         return BUSY;
@@ -43,8 +41,8 @@ Status useRCB(pPCB pcb, property RCBID) {
     }
 }
 
-pRCB getRCBPointer(property RCBID) {
-    pRCBNode p = (*list)->next;
+pRCB getRCBPointer(property RCBID, pRCBList *list) {
+    pRCBNode p = (*list)->head->next;
     while (p) {
         if (p->rcb->ID == RCBID) {
             return p->rcb;
@@ -54,9 +52,9 @@ pRCB getRCBPointer(property RCBID) {
     }
 }
 
-int lengthRCBList(void) {
+int lengthRCBList(pRCBList *list) {
     int sum = 0;
-    pRCBNode p = (*list)->next;
+    pRCBNode p = (*list)->head->next;
     while (p) {
         sum++;
         p = p->next;

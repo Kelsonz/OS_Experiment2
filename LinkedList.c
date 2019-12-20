@@ -52,12 +52,28 @@ Status delNode(pList *L) {
 }
 Status destroyList(pList *L) {
     int len = lenList(*L);
-    while (len>0){
+    while (len > 0) {
         delNode(L);
         len--;
-        if (len == 0){
+        if (len == 0) {
             free((*L)->head);
         }
+    }
+}
+
+Status findAndDelNode(pList *L, property ID) {
+    pNode p = (*L)->head;
+    if (p->next == NULL) {
+        return ERROR;
+    }
+    while (TRUE) {
+        if (p->next->id == ID) {
+            pNode q = p->next->next;
+            p->next = q;
+            free(p->next);
+            break;
+        }
+        p = p->next;
     }
 }
 
@@ -67,7 +83,7 @@ Status printList(pList L) {
     for (int i = 0; i < len; i++) {
         p = p->next;
         if (i == len - 1) {
-            printf("%d", p->id);
+            printf("%d\n", p->id);
         } else {
             printf("%d -> ", p->id);
         }

@@ -2,26 +2,29 @@
 // Created by 傅康 on 2019/12/20.
 //
 
-#ifndef OS_EXPERIMENT2_PCB_H
-#define OS_EXPERIMENT2_PCB_H
+#ifndef OS_EXPERIMENT2_CB_H
+#define OS_EXPERIMENT2_CB_H
 
-#include "LinkedList.h"
 #include <stdio.h>
 #include <stdlib.h>
-
+#include "LinkedList.h"
+//进程状态
 #define READY 10
-#define READYSUSPEND 11
 #define RUN 12
 #define BLOCKED 13
-#define BLOCKEDSUSPEND 14
-
+//资源使用状态
+#define USING 21
+#define NOTUSING 22
+#define BUSY 23
+#define SUCCESS 24
 typedef int property;
 typedef struct status {
     property stausID;
 } PCBStatus, *pPCBStatus;
 typedef struct PCB {
     property ID;
-    pList resource;
+    pList resUsing;
+    pList resRequest;
     pPCBStatus status;
     struct PCBTree *pPTree;
     property priority;
@@ -37,6 +40,21 @@ typedef struct PCBTree {
     pPCBList son;
 } PCBTree, *pPCBTree;
 
+typedef struct RCB {
+    property ID;
+    property isUse;
+    pList waitPList;
+} RCB, *pRCB;
+typedef struct RCBNode {
+    pRCB rcb;
+    struct RCBNode *next;
+} RCBNode, *pRCBNode;
+typedef struct RCBList {
+    pRCBNode head;
+} RCBList, *pRCBList;
+/*
+ * PCB部分
+ */
 //创建进程
 Status createPCB(pPCB *pcb, property ID, property priority);
 
@@ -68,8 +86,31 @@ Status setStatus(pPCB pcb, property status);
 
 //获得进程状态
 property getStatus(pPCB pcb);
+
 //进程申请资源
-Status getResource(pPCB pcb, property RCBID);
+Status getResource(pPCB pcb, property RCBID, pRCBList *list, pList pReadyList, pList pBlockedList);
+
 //获得当前进程的优先级
 Status setPriority(pPCB pcb);
-#endif //OS_EXPERIMENT2_PCB_H
+
+/*
+ * RCB部分
+ */
+//初始化资源列表
+Status initRCBList(pRCBList *list);
+
+Status insertRCB(pRCB p, pRCBList *list);
+
+//新建资源
+Status createRCB(pRCB *p, property ID, pRCBList *list);
+
+//使用资源
+Status useRCB(pPCB pcb, property RCBIDpRCB, pRCBList *list);
+
+//通过资源ID获得资源指针
+pRCB getRCBPointer(property RCBID, pRCBList *list);
+
+//资源列表长度
+int lengthRCBList(pRCBList *list);
+
+#endif //OS_EXPERIMENT2_CB_H

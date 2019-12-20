@@ -3,4 +3,4 @@ project(OS_Experiment2 C)
 
 set(CMAKE_C_STANDARD 99)
 
-add_executable(OS_Experiment2 main.c LinkedList.h PCB.c RCB.c LinkedList.c PCB.h RCB.h)
+add_executable(OS_Experiment2 main.c LinkedList.h PCB.c RCB.c LinkedList.c CB.h)

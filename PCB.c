@@ -3,8 +3,7 @@
 //
 #include "LinkedList.h"
 
-#include "PCB.h"
-#include "RCB.h"
+#include "CB.h"
 
 Status createPCB(pPCB *pcb, property ID, property priority) {
     (*pcb) = (pPCB) malloc(sizeof(PCB));
@@ -15,7 +14,8 @@ Status createPCB(pPCB *pcb, property ID, property priority) {
     }
     createPCBTree(&((*pcb)->pPTree));
     createPCBStatus(&((*pcb)->status));
-    createList(&((*pcb)->resource));
+    createList(&((*pcb)->resUsing));
+    createList(&((*pcb)->resRequest));
 };
 
 Status createPCBStatus(pPCBStatus *pcbStatus) {
@@ -36,7 +36,8 @@ Status createPCBList(pPCBList *pcbList) {
 Status destroyPCB(pPCB *pcb) {
     destroyPCBStatus(&((*pcb)->status));
     destroyPCBTree(&((*pcb)->pPTree));
-    destroyList(&((*pcb)->resource));
+    destroyList(&((*pcb)->resUsing));
+    destroyList(&((*pcb)->resRequest));
     free(*pcb);
 }
 
@@ -73,16 +74,25 @@ Status setStatus(pPCB pcb, property status) {
     pcb->status->stausID = status;
     return OK;
 }
-property getStatus(pPCB pcb){
+
+property getStatus(pPCB pcb) {
     return pcb->status->stausID;
 }
 
-Status getResource(pPCB pcb, property RCBID){
-    pcb->status->stausID = BLOCKED;
-    if (useRCB(pcb,RCBID))
-    insertList(&((*pcb).resource),RCBID);
+//PCB申请资源
+Status getResource(pPCB pcb, property RCBID, pRCBList *list, pList pReadyList, pList pBlockedList) {
+    property result = useRCB(pcb, RCBID, list);
+    if (result == SUCCESS) {
+        insertList(&((*pcb).resUsing), RCBID);
+    } else if (result == BUSY) {
+        pcb->status->stausID = BLOCKED;
+        insertList(&((*pcb).resRequest), RCBID);
+//        todo:进程在对队列中的移动
+//        insertList(&pReadyList, pcb->ID);
+    }
     return OK;
 }
-Status setPriority(pPCB pcb){
+
+Status setPriority(pPCB pcb) {
     return pcb->priority;
 }
