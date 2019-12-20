@@ -66,7 +66,7 @@ int lengthPCBList(pPCBList list) {
         sum++;
         p = p->next;
     }
-    return p;
+    return sum;
 }
 
 Status setStatus(pPCB pcb, property status) {
