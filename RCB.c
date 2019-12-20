@@ -40,7 +40,7 @@ Status destroyRCB(pRCB *p) {
 Status useRCB(pPCB pcb, property RCBID, pRCBList list) {
     pRCB rcb = getRCBPointer(RCBID, list);
     if (rcb->isUse == USING) {
-        insertList(&(rcb->waitPList), pcb->ID);
+        insertList((rcb->waitPList), pcb->ID, pcb->priority);
         return BUSY;
     } else if (rcb->isUse == NOTUSING) {
         rcb->isUse = USING;

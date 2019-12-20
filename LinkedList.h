@@ -20,13 +20,14 @@ typedef struct list {
 } List, *pList;
 typedef struct node {
     Element id;
+    Element priority;
     struct node *next;
 } Node, *pNode;
 typedef pList pReadyList;
 typedef pList pBlockedList;
 
 // 创建节点
-Status createNode(pNode *p, Element id);
+Status createNode(pNode *p, Element id, Element priority);
 
 // 初始化表
 Status createList(pList *L);
@@ -35,7 +36,7 @@ Status createList(pList *L);
 int lenList(pList L);
 
 // 使用尾插法插入数据
-Status insertList(pList *L, Element id);
+Status insertList(pList L, Element id, Element priority);
 
 // 删除数据
 Status destroyList(pList *L);
@@ -48,5 +49,11 @@ Status findAndDelNode(pList *L, property ID);
 
 // 打印表
 Status printList(pList L);
+
+//链表中两个节点互换位置
+Status change(pList L, pNode p);
+
+//将链表关键字按照从大到小排序
+Status sort(pList L);
 
 #endif //OS_EXPERIMENT2_LINKEDLIST_H

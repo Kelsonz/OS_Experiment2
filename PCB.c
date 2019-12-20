@@ -32,6 +32,7 @@ Status createPCBTree(pPCBTree *pcbTree) {
 Status createPCBList(pPCBList *pcbList) {
     (*pcbList) = (pPCBList) malloc(sizeof(PCBList));
     (*pcbList)->head = (pPCBNode) malloc(sizeof(PCBLNode));
+    (*pcbList)->count = 0;
     (*pcbList)->head->next = NULL;
 }
 
@@ -79,12 +80,12 @@ property getStatus(pPCB pcb) {
 Status getResource(pPCB pcb, property RCBID, pRCBList *list, pList pReadyList, pList pBlockedList) {
     property result = useRCB(pcb, RCBID, list);
     if (result == SUCCESS) {
-        insertList(&((*pcb).resUsing), RCBID);
+        insertList(((*pcb).resUsing), RCBID, 0);
     } else if (result == BUSY) {
         pcb->status->stausID = BLOCKED;
-        insertList(&((*pcb).resRequest), RCBID);
+        insertList(((*pcb).resRequest), RCBID, 0);
 //        todo:进程在对队列中的移动
-//        insertList(&pReadyList, pcb->ID);
+//        insertList(pReadyList, pcb->ID);
     }
     return OK;
 }
@@ -100,7 +101,7 @@ Status setPriority(pPCB pcb) {
 
 Status addToReadyList(pPCB pcb, pList *pReadyList) {
     pcb->status->stausID = READY;
-    insertList(pReadyList, pcb->ID);
+    insertList(pReadyList, pcb->ID, pcb->priority);
 }
 
 Status quitFromReadyList(pPCB pcb, pList *pReadyList, property status) {
@@ -110,7 +111,7 @@ Status quitFromReadyList(pPCB pcb, pList *pReadyList, property status) {
 
 Status addToBlockedList(pPCB pcb, pList *pBlockedList) {
     pcb->status->stausID = BLOCKED;
-    insertList(pBlockedList, pcb->ID);
+    insertList(pBlockedList, pcb->ID, pcb->priority);
 }
 
 Status quitFromBlockedList(pPCB pcb, pList *pBlockedList, property status) {

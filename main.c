@@ -4,8 +4,8 @@
 #include "LinkedList.h"
 #include "CB.h"
 
-int main() {
-//    初始化资源列表
+void exp() {
+    //    初始化资源列表
     pRCBList list;
     initRCBList(&list);
 //    初始化就绪队列
@@ -32,4 +32,24 @@ int main() {
 
     destroyPCB(&A);
     destroyRCB(&R1);
+}
+
+void list() {
+    pList list;
+    createList(&list);
+    insertList(list, 1, 1);
+    insertList(list, 2, 2);
+    insertList(list, 5, 5);
+    insertList(list, -2, -2);
+    insertList(list, 9, 9);
+    insertList(list, 14, 14);
+    insertList(list, 0, 0);
+    printList(list);
+    sort(list);
+    printList(list);
+}
+
+int main() {
+//    exp();
+    list();
 }

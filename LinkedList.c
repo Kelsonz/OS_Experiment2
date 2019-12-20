@@ -4,38 +4,31 @@
 
 #include "LinkedList.h"
 
-Status createNode(pNode *p, Element id) {
+Status createNode(pNode *p, Element id, Element priority) {
     (*p) = (pNode) malloc(sizeof(Node));
     (*p)->id = id;
+    (*p)->priority = priority;
     (*p)->next = NULL;
 }
 
 Status createList(pList *L) {
     (*L) = (pList) malloc(sizeof(List));
-    pNode head;
-    createNode(&head, 0);
-    (*L)->head = head;
+    (*L)->head = (pNode) malloc(sizeof(Node));
+    (*L)->head->id = 0;
+    (*L)->head->priority = 0;
 };
 
 int lenList(pList L) {
-//    int sum = 0;
-//    pNode p = L->head->next;
-//    while (p) {
-//        sum++;
-//        p = p->next;
-//    }
-//
-//    return sum;
     return L->head->id;
 }
 
-Status insertList(pList *L, Element id) {
+Status insertList(pList L, Element id, Element priority) {
     pNode p;
-    createNode(&p, id);
-    pNode temp = (*L)->head->next;
-    (*L)->head->next = p;
+    createNode(&p, id, priority);
+    pNode temp = (L)->head->next;
+    (L)->head->next = p;
     p->next = temp;
-    (*L)->head->id++;
+    (L)->head->id++;
     return OK;
 }
 
@@ -52,6 +45,7 @@ Status delNode(pList *L) {
         return OK;
     }
 }
+
 Status destroyList(pList *L) {
     int len = lenList(*L);
     while (len > 0) {
@@ -91,4 +85,38 @@ Status printList(pList L) {
         }
     }
     return OK;
+}
+
+Status change(pList L, pNode p) {
+    pNode x = p->next;
+    pNode y = x->next;
+    pNode z = y->next;
+    p->next = y;
+    y->next = x;
+    x->next = z;
+}
+
+Status sort(pList L) {
+    int len = (L)->head->id;
+    if (len == 0 | len == 1) {
+        return OK;
+    }
+    int flag = FALSE;
+    pNode p = (L)->head;
+    for (int i = 0; i < len - 1; ++i) {
+        for (int j = 0; j < len - i - 1; ++j) {
+            if (p->next->priority < p->next->next->priority) {
+                change(L, p);
+                flag = TRUE;
+            }
+            p = p->next;
+        }
+        if (flag) {
+            p = (L)->head;
+            flag = FALSE;
+            continue;
+        } else {
+            break;
+        }
+    }
 }
