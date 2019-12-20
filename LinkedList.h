@@ -2,12 +2,14 @@
 // Created by 傅康 on 2019/12/13.
 //
 
-#ifndef OS_EXPERIMENT2_EXPERIMENT_H
-#define OS_EXPERIMENT2_EXPERIMENT_H
+#ifndef OS_EXPERIMENT2_LINKEDLIST_H
+#define OS_EXPERIMENT2_LINKEDLIST_H
 #include <stdlib.h>
 #include <stdio.h>
 
 #define OK 1
+#define ERROR -2
+#define OVERFLOW -1
 typedef int Element;
 typedef int Status;
 
@@ -20,20 +22,21 @@ typedef struct node {
 } Node, *pNode;
 
 // 创建节点
-Status Node_Create(pNode *p, Element id);
+Status createNode(pNode *p, Element id);
 
 // 初始化表
-Status List_Init(pList *L);
+Status createList(pList *L);
 
 // 获得表的长度
-int List_len(pList L);
+int lenList(pList L);
 
 // 使用尾插法插入数据
-Status List_Insert(pList *L, Element id);
+Status insertList(pList *L, Element id);
 
 // 删除数据
-Status List_Del(pList *L);
+Status destroyList(pList *L);
+Status delNode(pList *L);
 
 // 打印表
-Status List_Print(pList L);
-#endif //OS_EXPERIMENT2_EXPERIMENT_H
+Status printList(pList L);
+#endif //OS_EXPERIMENT2_LINKEDLIST_H

@@ -2,24 +2,22 @@
 // Created by 傅康 on 2019/12/13.
 //
 
-#include "Experiment.h"
+#include "LinkedList.h"
 
-Status Node_Create(pNode *p, Element id) {
-
+Status createNode(pNode *p, Element id) {
     (*p) = (pNode) malloc(sizeof(Node));
     (*p)->id = id;
     (*p)->next = NULL;
-
 }
 
-Status List_Init(pList *L) {
+Status createList(pList *L) {
     (*L) = (pList) malloc(sizeof(List));
     pNode head;
-    Node_Create(&head, 0);
+    createNode(&head, 0);
     (*L)->head = head;
 };
 
-int List_len(pList L) {
+int lenList(pList L) {
     int sum = 0;
     pNode p = L->head->next;
     while (p) {
@@ -30,30 +28,41 @@ int List_len(pList L) {
     return sum;
 }
 
-Status List_Insert(pList *L, Element id) {
+Status insertList(pList *L, Element id) {
     pNode p;
-    Node_Create(&p, id);
+    createNode(&p, id);
     pNode temp = (*L)->head->next;
     (*L)->head->next = p;
     p->next = temp;
     return OK;
 }
 
-Status List_Del(pList *L) {
+Status delNode(pList *L) {
     pNode p = (*L)->head->next;
-    if (List_len(*L) == 1) {
+    if (lenList(*L) == 1) {
         free(p);
+        (*L)->head->next = NULL;
         return OK;
     } else {
         pNode q = p->next;
-        (*L)->head->next = q;
         free(p);
+        (*L)->head->next = q;
         return OK;
     }
 }
+Status destroyList(pList *L) {
+    int len = lenList(*L);
+    while (len>0){
+        delNode(L);
+        len--;
+        if (len == 0){
+            free((*L)->head);
+        }
+    }
+}
 
-Status List_Print(pList L) {
-    int len = List_len(L);
+Status printList(pList L) {
+    int len = lenList(L);
     pNode p = L->head;
     for (int i = 0; i < len; i++) {
         p = p->next;
