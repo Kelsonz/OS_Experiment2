@@ -17,7 +17,6 @@
 #define NOTUSING 22
 #define BUSY 23
 #define SUCCESS 24
-typedef int property;
 typedef struct status {
     property stausID;
 } PCBStatus, *pPCBStatus;
@@ -33,7 +32,11 @@ typedef struct PCB {
 typedef struct PLNode {
     pPCB PPointer;
     struct PLNode *next;
-} PCBLNode, *pPCBNode, *pPCBList;
+} PCBLNode, *pPCBNode;
+typedef struct PCBList {
+    int count;
+    PCBLNode *head;
+} PCBList, *pPCBList;
 // 进程树
 typedef struct PCBTree {
     pPCB father;
@@ -50,13 +53,14 @@ typedef struct RCBNode {
     struct RCBNode *next;
 } RCBNode, *pRCBNode;
 typedef struct RCBList {
+    int count;
     pRCBNode head;
 } RCBList, *pRCBList;
 /*
  * PCB部分
  */
 //创建进程
-Status createPCB(pPCB *pcb, property ID, property priority);
+Status createPCB(pPCB *pcb, property ID, property priority, pList pReadyList);
 
 //创建进程状态
 Status createPCBStatus(pPCBStatus *pcbStatus);
@@ -93,24 +97,46 @@ Status getResource(pPCB pcb, property RCBID, pRCBList *list, pList pReadyList, p
 //获得当前进程的优先级
 Status setPriority(pPCB pcb);
 
+//释放资源
+Status releaseResource(pPCB pcb, property RCBID, pRCBList *list, pList pReadyList, pList pBlockedList);
+
+//加入就绪队列
+Status addToReadyList(pPCB pcb, pList *pReadyList);
+
+//撤出就绪队列
+Status quitFromReadyList(pPCB pcb, pList *pReadyList, property status);
+
+//加入阻塞队列
+Status addToBlockedList(pPCB pcb, pList *pBlockedList);
+
+//撤出阻塞队列
+Status quitFromBlockedList(pPCB pcb, pList *pBlockedList, property status);
+
+//调度
+Status scheduler(pList pReadyList, pList pBlockedList);
+
+
 /*
  * RCB部分
  */
 //初始化资源列表
 Status initRCBList(pRCBList *list);
 
-Status insertRCB(pRCB p, pRCBList *list);
+Status insertRCB(pRCB p, pRCBList list);
 
 //新建资源
-Status createRCB(pRCB *p, property ID, pRCBList *list);
+Status createRCB(pRCB *p, property ID, pRCBList list);
+
+Status destroyRCB(pRCB *p);
 
 //使用资源
-Status useRCB(pPCB pcb, property RCBIDpRCB, pRCBList *list);
+Status useRCB(pPCB pcb, property RCBID, pRCBList list);
+
+//释放资源
+Status releaseRCB(pPCB pcb, property RCBID, pRCBList *list);
 
 //通过资源ID获得资源指针
-pRCB getRCBPointer(property RCBID, pRCBList *list);
+pRCB getRCBPointer(property RCBID, pRCBList list);
 
-//资源列表长度
-int lengthRCBList(pRCBList *list);
 
 #endif //OS_EXPERIMENT2_CB_H

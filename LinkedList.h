@@ -15,7 +15,6 @@
 typedef int property;
 typedef int Element;
 typedef int Status;
-
 typedef struct list {
     struct node *head;
 } List, *pList;

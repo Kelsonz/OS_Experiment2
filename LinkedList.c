@@ -18,14 +18,15 @@ Status createList(pList *L) {
 };
 
 int lenList(pList L) {
-    int sum = 0;
-    pNode p = L->head->next;
-    while (p) {
-        sum++;
-        p = p->next;
-    }
-
-    return sum;
+//    int sum = 0;
+//    pNode p = L->head->next;
+//    while (p) {
+//        sum++;
+//        p = p->next;
+//    }
+//
+//    return sum;
+    return L->head->id;
 }
 
 Status insertList(pList *L, Element id) {
@@ -34,6 +35,7 @@ Status insertList(pList *L, Element id) {
     pNode temp = (*L)->head->next;
     (*L)->head->next = p;
     p->next = temp;
+    (*L)->head->id++;
     return OK;
 }
 

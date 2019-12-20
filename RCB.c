@@ -7,21 +7,23 @@ Status initRCBList(pRCBList *list) {
     (*list) = (pRCBList) malloc(sizeof(RCBList));
     (*list)->head = (pRCBNode) malloc(sizeof(RCBNode));
     (*list)->head->next = NULL;
+    (*list)->count = 0;
 }
 
-Status insertRCB(pRCB p, pRCBList *list) {
+Status insertRCB(pRCB p, pRCBList list) {
     RCBNode *pNode = (RCBNode *) malloc(sizeof(RCBNode));
     pNode->rcb = p;
-    if (lengthRCBList(list) == 0) {
-        (*list)->head->next = pNode;
+    list->count++;
+    if (list->count == 0) {
+        list->head->next = pNode;
     } else {
-        pRCBNode q = (*list)->head->next;
-        (*list)->head->next = pNode;
+        pRCBNode q = list->head->next;
+        list->head->next = pNode;
         pNode->next = q;
     }
 }
 
-Status createRCB(pRCB *p, property ID, pRCBList *list) {
+Status createRCB(pRCB *p, property ID, pRCBList list) {
     (*p) = (pRCB) malloc(sizeof(RCB));
     (*p)->ID = ID;
     (*p)->isUse = NOTUSING;
@@ -30,7 +32,12 @@ Status createRCB(pRCB *p, property ID, pRCBList *list) {
     insertRCB(*p, list);
 }
 
-Status useRCB(pPCB pcb, property RCBID, pRCBList *list) {
+Status destroyRCB(pRCB *p) {
+    destroyList(&((*p)->waitPList));
+    free(*p);
+}
+
+Status useRCB(pPCB pcb, property RCBID, pRCBList list) {
     pRCB rcb = getRCBPointer(RCBID, list);
     if (rcb->isUse == USING) {
         insertList(&(rcb->waitPList), pcb->ID);
@@ -41,8 +48,14 @@ Status useRCB(pPCB pcb, property RCBID, pRCBList *list) {
     }
 }
 
-pRCB getRCBPointer(property RCBID, pRCBList *list) {
-    pRCBNode p = (*list)->head->next;
+Status releaseRCB(pPCB pcb, property RCBID, pRCBList *list) {
+    pRCB rcb = getRCBPointer(RCBID, list);
+    rcb->isUse = NOTUSING;
+    return OK;
+}
+
+pRCB getRCBPointer(property RCBID, pRCBList list) {
+    pRCBNode p = (list)->head->next;
     while (p) {
         if (p->rcb->ID == RCBID) {
             return p->rcb;
@@ -50,14 +63,4 @@ pRCB getRCBPointer(property RCBID, pRCBList *list) {
             p = p->next;
         }
     }
-}
-
-int lengthRCBList(pRCBList *list) {
-    int sum = 0;
-    pRCBNode p = (*list)->head->next;
-    while (p) {
-        sum++;
-        p = p->next;
-    }
-    return sum;
 }

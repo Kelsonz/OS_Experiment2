@@ -5,7 +5,7 @@
 
 #include "CB.h"
 
-Status createPCB(pPCB *pcb, property ID, property priority) {
+Status createPCB(pPCB *pcb, property ID, property priority, pList pReadyList) {
     (*pcb) = (pPCB) malloc(sizeof(PCB));
     (*pcb)->priority = priority;
     (*pcb)->ID = ID;
@@ -16,6 +16,7 @@ Status createPCB(pPCB *pcb, property ID, property priority) {
     createPCBStatus(&((*pcb)->status));
     createList(&((*pcb)->resUsing));
     createList(&((*pcb)->resRequest));
+    addToReadyList(*pcb, &pReadyList);
 };
 
 Status createPCBStatus(pPCBStatus *pcbStatus) {
@@ -29,8 +30,9 @@ Status createPCBTree(pPCBTree *pcbTree) {
 };
 
 Status createPCBList(pPCBList *pcbList) {
-    (*pcbList) = (pPCBList) malloc(sizeof(PCBLNode));
-    (*pcbList)->next = NULL;
+    (*pcbList) = (pPCBList) malloc(sizeof(PCBList));
+    (*pcbList)->head = (pPCBNode) malloc(sizeof(PCBLNode));
+    (*pcbList)->head->next = NULL;
 }
 
 Status destroyPCB(pPCB *pcb) {
@@ -61,13 +63,7 @@ Status destoryPCBList(pPCBList *pcbList) {
 }
 
 int lengthPCBList(pPCBList list) {
-    int sum = 0;
-    pPCBNode p = list->next;
-    while (p) {
-        sum++;
-        p = p->next;
-    }
-    return sum;
+    return list->count;
 }
 
 Status setStatus(pPCB pcb, property status) {
@@ -93,6 +89,35 @@ Status getResource(pPCB pcb, property RCBID, pRCBList *list, pList pReadyList, p
     return OK;
 }
 
+Status releaseResource(pPCB pcb, property RCBID, pRCBList *list, pList pReadyList, pList pBlockedList) {
+    releaseRCB(pcb, RCBID, list);
+    findAndDelNode(&((*pcb).resUsing), RCBID);
+}
+
 Status setPriority(pPCB pcb) {
     return pcb->priority;
+}
+
+Status addToReadyList(pPCB pcb, pList *pReadyList) {
+    pcb->status->stausID = READY;
+    insertList(pReadyList, pcb->ID);
+}
+
+Status quitFromReadyList(pPCB pcb, pList *pReadyList, property status) {
+    findAndDelNode(pReadyList, pcb->ID);
+    pcb->status->stausID = status;
+}
+
+Status addToBlockedList(pPCB pcb, pList *pBlockedList) {
+    pcb->status->stausID = BLOCKED;
+    insertList(pBlockedList, pcb->ID);
+}
+
+Status quitFromBlockedList(pPCB pcb, pList *pBlockedList, property status) {
+    findAndDelNode(pBlockedList, pcb->ID);
+    pcb->status->stausID = status;
+}
+
+Status scheduler(pList pReadyList, pList pBlockedList) {
+
 }
