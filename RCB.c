@@ -38,7 +38,7 @@ Status destroyRCB(pRCB *p) {
 }
 
 Status useRCB(pPCB pcb, property RCBID, pRCBList list) {
-    pRCB rcb = getRCBPointer(RCBID, list);
+    pRCB rcb = findRCBPointer(RCBID, list);
     if (rcb->isUse == USING) {
         insertList((rcb->waitPList), pcb->ID, pcb->priority);
         return BUSY;
@@ -48,13 +48,13 @@ Status useRCB(pPCB pcb, property RCBID, pRCBList list) {
     }
 }
 
-Status releaseRCB(pPCB pcb, property RCBID, pRCBList *list) {
-    pRCB rcb = getRCBPointer(RCBID, list);
+Status releaseRCB(pPCB pcb, property RCBID, pRCBList list) {
+    pRCB rcb = findRCBPointer(RCBID, list);
     rcb->isUse = NOTUSING;
     return OK;
 }
 
-pRCB getRCBPointer(property RCBID, pRCBList list) {
+pRCB findRCBPointer(property RCBID, pRCBList list) {
     pRCBNode p = (list)->head->next;
     while (p) {
         if (p->rcb->ID == RCBID) {

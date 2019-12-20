@@ -16,6 +16,7 @@ Status createList(pList *L) {
     (*L)->head = (pNode) malloc(sizeof(Node));
     (*L)->head->id = 0;
     (*L)->head->priority = 0;
+    (*L)->head->next = (pNode) malloc(sizeof(Node));
 };
 
 int lenList(pList L) {

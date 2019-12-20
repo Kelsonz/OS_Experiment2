@@ -4,10 +4,21 @@
 #include "LinkedList.h"
 #include "CB.h"
 
+void exp();
+
+void list();
+
+int main() {
+    exp();
+//    list();
+}
+
 void exp() {
     //    初始化资源列表
-    pRCBList list;
-    initRCBList(&list);
+    pRCBList rcbList;
+    initRCBList(&rcbList);
+    pPCBList pcbList;
+    initPCBList(&pcbList);
 //    初始化就绪队列
     pReadyList readyList;
     createList(&readyList);
@@ -16,20 +27,21 @@ void exp() {
     createList(&blockedList);
 
     pPCB A;
-    createPCB(&A, 121, 1, readyList);
+    createPCB(&A, 155, 1, pcbList, readyList);
     pPCB B;
-    createPCB(&A, 14, 5, readyList);
+    createPCB(&B, 14, 555, pcbList, readyList);
     pRCB R1;
-    createRCB(&R1, 1, list);
+    createRCB(&R1, 1, rcbList);
     pRCB R2;
-    createRCB(&R2, 2, list);
+    createRCB(&R2, 2, rcbList);
     pRCB R3;
-    createRCB(&R3, 3, list);
+    createRCB(&R3, 3, rcbList);
 
-    useRCB(A, 1, list);
-    useRCB(A, 2, list);
-    useRCB(B, 1, list);
+    useRCB(A, 1, rcbList);
+    useRCB(A, 2, rcbList);
+    useRCB(B, 1, rcbList);
 
+    showAllPCB(pcbList);
     destroyPCB(&A);
     destroyRCB(&R1);
 }
@@ -47,9 +59,4 @@ void list() {
     printList(list);
     sort(list);
     printList(list);
-}
-
-int main() {
-//    exp();
-    list();
 }

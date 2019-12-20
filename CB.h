@@ -30,12 +30,12 @@ typedef struct PCB {
 } PCB, *pPCB;
 // 子进程链表
 typedef struct PLNode {
-    pPCB PPointer;
+    pPCB pcb;
     struct PLNode *next;
-} PCBLNode, *pPCBNode;
+} PCBNode, *pPCBNode;
 typedef struct PCBList {
     int count;
-    PCBLNode *head;
+    PCBNode *head;
 } PCBList, *pPCBList;
 // 进程树
 typedef struct PCBTree {
@@ -60,7 +60,7 @@ typedef struct RCBList {
  * PCB部分
  */
 //创建进程
-Status createPCB(pPCB *pcb, property ID, property priority, pList pReadyList);
+Status createPCB(pPCB *pcb, property ID, property priority, pPCBList pcbList, pList pReadyList);
 
 //创建进程状态
 Status createPCBStatus(pPCBStatus *pcbStatus);
@@ -92,7 +92,7 @@ Status setStatus(pPCB pcb, property status);
 property getStatus(pPCB pcb);
 
 //进程申请资源
-Status getResource(pPCB pcb, property RCBID, pRCBList *list, pList pReadyList, pList pBlockedList);
+Status getResource(pPCB pcb, property RCBID, pRCBList list, pList pReadyList, pList pBlockedList);
 
 //获得当前进程的优先级
 Status setPriority(pPCB pcb);
@@ -101,19 +101,25 @@ Status setPriority(pPCB pcb);
 Status releaseResource(pPCB pcb, property RCBID, pRCBList *list, pList pReadyList, pList pBlockedList);
 
 //加入就绪队列
-Status addToReadyList(pPCB pcb, pList *pReadyList);
-
-//撤出就绪队列
-Status quitFromReadyList(pPCB pcb, pList *pReadyList, property status);
+Status addToReadyList(pPCB pcb, pList pReadyList);
 
 //加入阻塞队列
-Status addToBlockedList(pPCB pcb, pList *pBlockedList);
+Status addToBlockedList(pPCB pcb, pList pBlockedList);
 
-//撤出阻塞队列
-Status quitFromBlockedList(pPCB pcb, pList *pBlockedList, property status);
+//通过PCBID获得PCB指针
+pPCB findPCBPointer(property PCBID, pPCBList list);
 
 //调度
-Status scheduler(pList pReadyList, pList pBlockedList);
+Status scheduler(pList pReadyList, pList pBlockedList, pPCBList pcbList, pRCBList rcbList);
+
+//初始化PCB表
+Status initPCBList(pPCBList *list);
+
+//将创建的PCB加入到PCB表中
+Status insertPCB(pPCB p, pPCBList list);
+
+Status showAllPCB(pPCBList list);
+
 
 
 /*
@@ -122,6 +128,7 @@ Status scheduler(pList pReadyList, pList pBlockedList);
 //初始化资源列表
 Status initRCBList(pRCBList *list);
 
+//将创建的RCB加入到资源列表中
 Status insertRCB(pRCB p, pRCBList list);
 
 //新建资源
@@ -133,10 +140,10 @@ Status destroyRCB(pRCB *p);
 Status useRCB(pPCB pcb, property RCBID, pRCBList list);
 
 //释放资源
-Status releaseRCB(pPCB pcb, property RCBID, pRCBList *list);
+Status releaseRCB(pPCB pcb, property RCBID, pRCBList list);
 
 //通过资源ID获得资源指针
-pRCB getRCBPointer(property RCBID, pRCBList list);
+pRCB findRCBPointer(property RCBID, pRCBList list);
 
 
 #endif //OS_EXPERIMENT2_CB_H

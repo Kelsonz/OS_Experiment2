@@ -2,10 +2,30 @@
 // Created by 傅康 on 2019/12/13.
 //
 #include "LinkedList.h"
-
+#include <time.h>
 #include "CB.h"
 
-Status createPCB(pPCB *pcb, property ID, property priority, pList pReadyList) {
+Status initPCBList(pPCBList *list) {
+    (*list) = (pPCBList) malloc(sizeof(PCBList));
+    (*list)->head = (pPCBNode) malloc(sizeof(PCBNode));
+    (*list)->head->next = NULL;
+    (*list)->count = 0;
+}
+
+Status insertPCB(pPCB p, pPCBList list) {
+    PCBNode *pNode = (PCBNode *) malloc(sizeof(PCBNode));
+    pNode->pcb = p;
+    list->count++;
+    if (list->count == 0) {
+        list->head->next = pNode;
+    } else {
+        pPCBNode q = list->head->next;
+        list->head->next = pNode;
+        pNode->next = q;
+    }
+}
+
+Status createPCB(pPCB *pcb, property ID, property priority, pPCBList pcbList, pList pReadyList) {
     (*pcb) = (pPCB) malloc(sizeof(PCB));
     (*pcb)->priority = priority;
     (*pcb)->ID = ID;
@@ -16,7 +36,8 @@ Status createPCB(pPCB *pcb, property ID, property priority, pList pReadyList) {
     createPCBStatus(&((*pcb)->status));
     createList(&((*pcb)->resUsing));
     createList(&((*pcb)->resRequest));
-    addToReadyList(*pcb, &pReadyList);
+    addToReadyList(*pcb, pReadyList);
+    insertPCB(*pcb, pcbList);
 };
 
 Status createPCBStatus(pPCBStatus *pcbStatus) {
@@ -31,7 +52,7 @@ Status createPCBTree(pPCBTree *pcbTree) {
 
 Status createPCBList(pPCBList *pcbList) {
     (*pcbList) = (pPCBList) malloc(sizeof(PCBList));
-    (*pcbList)->head = (pPCBNode) malloc(sizeof(PCBLNode));
+    (*pcbList)->head = (pPCBNode) malloc(sizeof(PCBNode));
     (*pcbList)->count = 0;
     (*pcbList)->head->next = NULL;
 }
@@ -77,15 +98,15 @@ property getStatus(pPCB pcb) {
 }
 
 //PCB申请资源
-Status getResource(pPCB pcb, property RCBID, pRCBList *list, pList pReadyList, pList pBlockedList) {
+Status getResource(pPCB pcb, property RCBID, pRCBList list, pList pReadyList, pList pBlockedList) {
     property result = useRCB(pcb, RCBID, list);
     if (result == SUCCESS) {
         insertList(((*pcb).resUsing), RCBID, 0);
     } else if (result == BUSY) {
         pcb->status->stausID = BLOCKED;
         insertList(((*pcb).resRequest), RCBID, 0);
-//        todo:进程在对队列中的移动
-//        insertList(pReadyList, pcb->ID);
+        findAndDelNode(&pReadyList, pcb->ID);
+        addToBlockedList(pcb, pBlockedList);
     }
     return OK;
 }
@@ -99,26 +120,54 @@ Status setPriority(pPCB pcb) {
     return pcb->priority;
 }
 
-Status addToReadyList(pPCB pcb, pList *pReadyList) {
+Status addToReadyList(pPCB pcb, pList pReadyList) {
     pcb->status->stausID = READY;
     insertList(pReadyList, pcb->ID, pcb->priority);
 }
 
-Status quitFromReadyList(pPCB pcb, pList *pReadyList, property status) {
-    findAndDelNode(pReadyList, pcb->ID);
-    pcb->status->stausID = status;
-}
-
-Status addToBlockedList(pPCB pcb, pList *pBlockedList) {
+Status addToBlockedList(pPCB pcb, pList pBlockedList) {
     pcb->status->stausID = BLOCKED;
     insertList(pBlockedList, pcb->ID, pcb->priority);
 }
 
-Status quitFromBlockedList(pPCB pcb, pList *pBlockedList, property status) {
-    findAndDelNode(pBlockedList, pcb->ID);
-    pcb->status->stausID = status;
+pPCB findPCBPointer(property PCBID, pPCBList list) {
+    pPCBNode p = (list)->head->next;
+    while (p) {
+        if (p->pcb->ID == PCBID) {
+            return p->pcb;
+        } else {
+            p = p->next;
+        }
+    }
 }
 
-Status scheduler(pList pReadyList, pList pBlockedList) {
+Status showAllPCB(pPCBList list) {
+    printf("ID\t\tPriority\tstatus");
+    printf("\n");
+    for (pPCBNode p = list->head->next; p != NULL; p = p->next) {
+        printf("%-5d\t", p->pcb->ID);
+        printf("%-5d\t\t", p->pcb->priority);
+        printList(p->pcb->resUsing);
+        printList(p->pcb->resRequest);
+        switch (p->pcb->status->stausID) {
+            case READY:
+                printf("READY");
+                break;
+            case RUN:
+                printf("RUN");
+                break;
+            case BLOCKED:
+                printf("READY");
+                break;
+        }
+        printf("\n");
+    }
+}
 
+Status scheduler(pList pReadyList, pList pBlockedList, pPCBList pcbList, pRCBList rcblist) {
+    while (TRUE) {
+        sort(pReadyList);
+        pPCB runPCB = findPCBPointer(pReadyList->head->next->id, pcbList);
+        runPCB->status->stausID = RUN;
+    }
 }
