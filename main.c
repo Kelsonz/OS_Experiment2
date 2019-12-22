@@ -17,19 +17,20 @@ void exp() {
     //    初始化资源列表
     pRCBList rcbList;
     createRCBList(&rcbList);
-    pPCBList pcbList;
-    createPCBList(&pcbList);
-//    初始化就绪队列
+
     pReadyList readyList;
     createPCBList(&readyList);
-//    初始化阻塞队列
     pBlockedList blockedList;
     createPCBList(&blockedList);
+    pRunList runList;
+    createPCBList(&runList);
+    pBlockedList finishList;
+    createPCBList(&finishList);
 
     pPCB A;
-    createPCB(&A, 155, 1, pcbList, readyList);
+    createPCB(&A, 1, 1, readyList);
     pPCB B;
-    createPCB(&B, 14, 555, pcbList, readyList);
+    createPCB(&B, 2, 5, readyList);
     pRCB R1;
     createRCB(&R1, 1, rcbList);
     pRCB R2;
@@ -39,9 +40,11 @@ void exp() {
 
     useRCB(A, R1);
     useRCB(A, R2);
+    useRCB(A, R3);
     useRCB(B, R1);
 
-    showAllPCB(pcbList);
+    scheduler(readyList, blockedList, runList, finishList);
+
     destroyPCB(&A);
     destroyRCB(&R1);
 }

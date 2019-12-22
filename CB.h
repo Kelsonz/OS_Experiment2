@@ -16,8 +16,6 @@
 //资源使用状态
 #define USING 21
 #define NOTUSING 22
-#define BUSY 23
-#define SUCCESS 24
 typedef struct status {
     property stausID;
 } PCBStatus, *pPCBStatus;
@@ -38,8 +36,10 @@ typedef struct PCBList {
     int count;
     PCBNode *head;
 } PCBList, *pPCBList;
+typedef pPCBList pRunList;
 typedef pPCBList pReadyList;
 typedef pPCBList pBlockedList;
+typedef pPCBList pFinishList;
 // 进程树
 typedef struct PCBTree {
     pPCB father;
@@ -63,7 +63,7 @@ typedef struct RCBList {
  * PCB部分
  */
 //创建进程
-Status createPCB(pPCB *pcb, property ID, property priority, pPCBList pcbList, pPCBList pReadyList);
+Status createPCB(pPCB *pcb, property ID, property priority, pPCBList pReadyList);
 
 //创建进程状态
 Status createPCBStatus(pPCBStatus *pcbStatus);
@@ -98,7 +98,7 @@ Status setStatus(pPCB pcb, property status);
 property getStatus(pPCB pcb);
 
 //进程申请资源
-Status getResource(pPCB pcb, pRCB rcb, pRCBList list, pPCBList pReadyList, pPCBList pBlockedList);
+Status useRCB(pPCB pcb, pRCB rcb);
 
 //获得当前进程的优先级
 Status setPriority(pPCB pcb);
@@ -118,19 +118,35 @@ Status addToBlockedList(pPCB pcb, pPCBList pBlockedList);
 //退出阻塞队列
 Status removeFromBlockedList(pPCB pcb, pPCBList pBlockedList);
 
+//加入运行队列
+Status addToRunList(pPCB pcb, pPCBList pRunList);
+
+//退出运行队列
+Status removeFromRunList(pPCB pcb, pPCBList pRunList);
+
+//加入完成队列
+Status addToFinishList(pPCB pcb, pPCBList pFinishList);
+
 //调度
-Status scheduler(pPCBList pReadyList, pPCBList pBlockedList);
+Status scheduler(pPCBList pReadyList, pPCBList pBlockedList, pPCBList pRunList, pPCBList pFinishList);
 
 //将创建的PCB加入到PCB表中
 Status insertPCB(pPCB p, pPCBList list);
 
 //打印所有进程
-Status showAllPCB(pPCBList list);
+Status showAllPCB(pPCBList pReadyList, pPCBList pBlockedList, pPCBList pRunList, pPCBList pFinishList);
+
+//打印进程队列
+Status printPCBList(pPCBList list);
 
 //运行就绪列表第一个进程
-Status runPCB(pPCBList pReadyList);
+Status runPCB(pPCBList pReadyList, pPCBList pBlockedList, pPCBList pRunList);
 
+//进程结束
+Status finishPCB(pPCBList pReadyList, pPCBList pBlockedList, pPCBList pRunList, pPCBList pFinishList);
 
+//打印进程信息
+Status printPCB(pPCB pcb);
 
 /*
  * RCB部分
@@ -150,8 +166,6 @@ Status createRCB(pRCB *p, property ID, pRCBList list);
 
 Status destroyRCB(pRCB *p);
 
-//使用资源
-Status useRCB(pPCB pcb, pRCB rcb);
 
 //重载资源，当当前资源被释放后，将其使用权交给等待队列中的进程
 Status reloadRCB(pRCB rcb);
@@ -166,7 +180,7 @@ Status findAndDelRCBNode(pRCB rcb, pRCBList rcbList);
 Status addToResRequest(pPCB pcb, pRCB rcb);
 
 //打印资源队列
-Status printRCBList(pRCBList list);
+Status showAllRCB(pRCBList list);
 
 
 #endif //OS_EXPERIMENT2_CB_H

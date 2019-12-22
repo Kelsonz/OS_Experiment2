@@ -47,18 +47,9 @@ Status destroyRCB(pRCB *p) {
     free(*p);
 }
 
-Status useRCB(pPCB pcb, pRCB rcb) {
-    if (rcb->isUse == USING) {
-        insertPCB(pcb, rcb->waitPList);
-        return BUSY;
-    } else if (rcb->isUse == NOTUSING) {
-        rcb->isUse = USING;
-        return SUCCESS;
-    }
-}
-
 Status findAndDelRCBNode(pRCB rcb, pRCBList rcbList) {
     rcb->isUse = NOTUSING;
+    rcbList->count--;
     pRCBNode p = rcbList->head;
     if (rcbList->count == 1) {
         free(p->next);
@@ -83,12 +74,13 @@ Status reloadRCB(pRCB rcb) {
     } else {
         pPCB pcb = getMaxPriorityPCB(rcb->waitPList);
         findAndDelRCBNode(rcb, pcb->resRequest);
-        useRCB(pcb, rcb);
         addToResUsingList(pcb, rcb);
+        rcb->isUse = USING;
+        findAndDelPCBNode(pcb, rcb->waitPList);
     }
 }
 
-Status printRCBList(pRCBList list) {
+Status showAllRCB(pRCBList list) {
     for (pRCBNode p = list->head->next; p != NULL; p = p->next) {
         printf("%d ", p->rcb->ID);
     }
