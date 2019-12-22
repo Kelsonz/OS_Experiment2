@@ -3,11 +3,21 @@
 //
 #include "CB.h"
 
-Status initRCBList(pRCBList *list) {
+Status createRCBList(pRCBList *list) {
     (*list) = (pRCBList) malloc(sizeof(RCBList));
     (*list)->head = (pRCBNode) malloc(sizeof(RCBNode));
     (*list)->head->next = NULL;
     (*list)->count = 0;
+}
+
+Status destroyRCBList(pRCBList *list) {
+    pRCBNode p = (*list)->head;
+    while (p->next) {
+        pRCBNode q = p->next;
+        free(p);
+        p = q;
+    }
+    free(p);
 }
 
 Status insertRCB(pRCB p, pRCBList list) {
@@ -27,20 +37,19 @@ Status createRCB(pRCB *p, property ID, pRCBList list) {
     (*p) = (pRCB) malloc(sizeof(RCB));
     (*p)->ID = ID;
     (*p)->isUse = NOTUSING;
-    createList(&((*p)->waitPList));
+    createPCBList(&((*p)->waitPList));
     //加入资源列表
     insertRCB(*p, list);
 }
 
 Status destroyRCB(pRCB *p) {
-    destroyList(&((*p)->waitPList));
+    destroyPCBList(&((*p)->waitPList));
     free(*p);
 }
 
-Status useRCB(pPCB pcb, property RCBID, pRCBList list) {
-    pRCB rcb = findRCBPointer(RCBID, list);
+Status useRCB(pPCB pcb, pRCB rcb) {
     if (rcb->isUse == USING) {
-        insertList((rcb->waitPList), pcb->ID, pcb->priority);
+        insertPCB(pcb, rcb->waitPList);
         return BUSY;
     } else if (rcb->isUse == NOTUSING) {
         rcb->isUse = USING;
@@ -48,19 +57,40 @@ Status useRCB(pPCB pcb, property RCBID, pRCBList list) {
     }
 }
 
-Status releaseRCB(pPCB pcb, property RCBID, pRCBList list) {
-    pRCB rcb = findRCBPointer(RCBID, list);
+Status findAndDelRCBNode(pRCB rcb, pRCBList rcbList) {
     rcb->isUse = NOTUSING;
-    return OK;
-}
-
-pRCB findRCBPointer(property RCBID, pRCBList list) {
-    pRCBNode p = (list)->head->next;
-    while (p) {
-        if (p->rcb->ID == RCBID) {
-            return p->rcb;
+    pRCBNode p = rcbList->head;
+    if (rcbList->count == 1) {
+        free(p->next);
+        p->next = NULL;
+        return OK;
+    }
+    while (p->next) {
+        if (p->next->rcb->ID == rcb->ID) {
+            pRCBNode q = p->next;
+            p->next = q->next;
+            free(q);
+            return OK;
         } else {
             p = p->next;
         }
     }
+}
+
+Status reloadRCB(pRCB rcb) {
+    if (rcb->waitPList->count == 0) {
+        return OK;
+    } else {
+        pPCB pcb = getMaxPriorityPCB(rcb->waitPList);
+        findAndDelRCBNode(rcb, pcb->resRequest);
+        useRCB(pcb, rcb);
+        addToResUsingList(pcb, rcb);
+    }
+}
+
+Status printRCBList(pRCBList list) {
+    for (pRCBNode p = list->head->next; p != NULL; p = p->next) {
+        printf("%d ", p->rcb->ID);
+    }
+    return OK;
 }

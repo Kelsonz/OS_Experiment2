@@ -23,8 +23,7 @@ typedef struct node {
     Element priority;
     struct node *next;
 } Node, *pNode;
-typedef pList pReadyList;
-typedef pList pBlockedList;
+
 
 // 创建节点
 Status createNode(pNode *p, Element id, Element priority);

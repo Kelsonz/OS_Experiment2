@@ -12,6 +12,7 @@
 #define READY 10
 #define RUN 12
 #define BLOCKED 13
+#define FINISH 14
 //资源使用状态
 #define USING 21
 #define NOTUSING 22
@@ -22,8 +23,8 @@ typedef struct status {
 } PCBStatus, *pPCBStatus;
 typedef struct PCB {
     property ID;
-    pList resUsing;
-    pList resRequest;
+    struct RCBList *resUsing;
+    struct RCBList *resRequest;
     pPCBStatus status;
     struct PCBTree *pPTree;
     property priority;
@@ -37,6 +38,8 @@ typedef struct PCBList {
     int count;
     PCBNode *head;
 } PCBList, *pPCBList;
+typedef pPCBList pReadyList;
+typedef pPCBList pBlockedList;
 // 进程树
 typedef struct PCBTree {
     pPCB father;
@@ -46,7 +49,7 @@ typedef struct PCBTree {
 typedef struct RCB {
     property ID;
     property isUse;
-    pList waitPList;
+    pPCBList waitPList;
 } RCB, *pRCB;
 typedef struct RCBNode {
     pRCB rcb;
@@ -60,7 +63,7 @@ typedef struct RCBList {
  * PCB部分
  */
 //创建进程
-Status createPCB(pPCB *pcb, property ID, property priority, pPCBList pcbList, pList pReadyList);
+Status createPCB(pPCB *pcb, property ID, property priority, pPCBList pcbList, pPCBList pReadyList);
 
 //创建进程状态
 Status createPCBStatus(pPCBStatus *pcbStatus);
@@ -80,10 +83,13 @@ Status destroyPCBStatus(pPCBStatus *pcbStatus);
 Status destroyPCBTree(pPCBTree *pcbTree);
 
 //销毁子进程链表
-Status destoryPCBList(pPCBList *pcbList);
+Status destroyPCBList(pPCBList *pcbList);
 
-//获得子进程链表长度
-int lengthPCBList(pPCBList list);
+//获得PCB队列中优先级最大的进程的指针
+pPCB getMaxPriorityPCB(pPCBList pcbList);
+
+//将进程移除进程队列
+Status findAndDelPCBNode(pPCB pcb, pPCBList list);
 
 //设置进程状态
 Status setStatus(pPCB pcb, property status);
@@ -92,41 +98,49 @@ Status setStatus(pPCB pcb, property status);
 property getStatus(pPCB pcb);
 
 //进程申请资源
-Status getResource(pPCB pcb, property RCBID, pRCBList list, pList pReadyList, pList pBlockedList);
+Status getResource(pPCB pcb, pRCB rcb, pRCBList list, pPCBList pReadyList, pPCBList pBlockedList);
 
 //获得当前进程的优先级
 Status setPriority(pPCB pcb);
 
-//释放资源
-Status releaseResource(pPCB pcb, property RCBID, pRCBList *list, pList pReadyList, pList pBlockedList);
+//释放进程所有资源
+Status releaseResource(pPCB pcb);
 
 //加入就绪队列
-Status addToReadyList(pPCB pcb, pList pReadyList);
+Status addToReadyList(pPCB pcb, pPCBList pReadyList);
+
+//退出就绪队列
+Status removeFromReadyList(pPCB pcb, pPCBList pReadyList);
 
 //加入阻塞队列
-Status addToBlockedList(pPCB pcb, pList pBlockedList);
+Status addToBlockedList(pPCB pcb, pPCBList pBlockedList);
 
-//通过PCBID获得PCB指针
-pPCB findPCBPointer(property PCBID, pPCBList list);
+//退出阻塞队列
+Status removeFromBlockedList(pPCB pcb, pPCBList pBlockedList);
 
 //调度
-Status scheduler(pList pReadyList, pList pBlockedList, pPCBList pcbList, pRCBList rcbList);
-
-//初始化PCB表
-Status initPCBList(pPCBList *list);
+Status scheduler(pPCBList pReadyList, pPCBList pBlockedList);
 
 //将创建的PCB加入到PCB表中
 Status insertPCB(pPCB p, pPCBList list);
 
+//打印所有进程
 Status showAllPCB(pPCBList list);
+
+//运行就绪列表第一个进程
+Status runPCB(pPCBList pReadyList);
 
 
 
 /*
  * RCB部分
  */
+
 //初始化资源列表
-Status initRCBList(pRCBList *list);
+Status createRCBList(pRCBList *list);
+
+//销毁资源列表
+Status destroyRCBList(pRCBList *list);
 
 //将创建的RCB加入到资源列表中
 Status insertRCB(pRCB p, pRCBList list);
@@ -137,13 +151,22 @@ Status createRCB(pRCB *p, property ID, pRCBList list);
 Status destroyRCB(pRCB *p);
 
 //使用资源
-Status useRCB(pPCB pcb, property RCBID, pRCBList list);
+Status useRCB(pPCB pcb, pRCB rcb);
 
-//释放资源
-Status releaseRCB(pPCB pcb, property RCBID, pRCBList list);
+//重载资源，当当前资源被释放后，将其使用权交给等待队列中的进程
+Status reloadRCB(pRCB rcb);
 
-//通过资源ID获得资源指针
-pRCB findRCBPointer(property RCBID, pRCBList list);
+//将得到并且正在占用的资源放到该PCB的resUsing列表中
+Status addToResUsingList(pPCB pcb, pRCB rcb);
+
+//资源退出队列
+Status findAndDelRCBNode(pRCB rcb, pRCBList rcbList);
+
+//将得不到的资源放到该PCB的resRequest列表中
+Status addToResRequest(pPCB pcb, pRCB rcb);
+
+//打印资源队列
+Status printRCBList(pRCBList list);
 
 
 #endif //OS_EXPERIMENT2_CB_H

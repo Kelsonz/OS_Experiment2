@@ -16,15 +16,15 @@ int main() {
 void exp() {
     //    初始化资源列表
     pRCBList rcbList;
-    initRCBList(&rcbList);
+    createRCBList(&rcbList);
     pPCBList pcbList;
-    initPCBList(&pcbList);
+    createPCBList(&pcbList);
 //    初始化就绪队列
     pReadyList readyList;
-    createList(&readyList);
+    createPCBList(&readyList);
 //    初始化阻塞队列
     pBlockedList blockedList;
-    createList(&blockedList);
+    createPCBList(&blockedList);
 
     pPCB A;
     createPCB(&A, 155, 1, pcbList, readyList);
@@ -37,9 +37,9 @@ void exp() {
     pRCB R3;
     createRCB(&R3, 3, rcbList);
 
-    useRCB(A, 1, rcbList);
-    useRCB(A, 2, rcbList);
-    useRCB(B, 1, rcbList);
+    useRCB(A, R1);
+    useRCB(A, R2);
+    useRCB(B, R1);
 
     showAllPCB(pcbList);
     destroyPCB(&A);

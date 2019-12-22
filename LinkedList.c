@@ -68,7 +68,7 @@ Status findAndDelNode(pList *L, property ID) {
             pNode q = p->next->next;
             p->next = q;
             free(p->next);
-            break;
+            return OK;
         }
         p = p->next;
     }
