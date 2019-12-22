@@ -68,13 +68,9 @@ Status insertPCB(pPCB p, pPCBList list) {
     PCBNode *pNode = (PCBNode *) malloc(sizeof(PCBNode));
     pNode->pcb = p;
     list->count++;
-    if (list->count == 0) {
-        list->head->next = pNode;
-    } else {
-        pPCBNode q = list->head->next;
-        list->head->next = pNode;
-        pNode->next = q;
-    }
+    pPCBNode q = list->head->next;
+    list->head->next = pNode;
+    pNode->next = q;
 }
 
 
@@ -88,6 +84,7 @@ Status findAndDelPCBNode(pPCB pcb, pPCBList list) {
             return OK;
         }
     }
+
 }
 
 Status setPriority(pPCB pcb) {
@@ -113,6 +110,12 @@ pPCB getMaxPriorityPCB(pPCBList list) {
     return max->pcb;
 }
 
+pPCB getFirstPriorityPCB(pPCBList list) {
+    pPCBNode p = list->head;
+    for (; p->next != NULL; p = p->next);
+    return p->pcb;
+}
+
 //PCB申请资源
 Status useRCB(pPCB pcb, pRCB rcb) {
     if (rcb->isUse == USING) {
@@ -124,13 +127,13 @@ Status useRCB(pPCB pcb, pRCB rcb) {
     }
 }
 
-Status releaseResource(pPCB pcb) {
+Status releaseResource(bool flag, pPCB pcb) {
     for (pRCBNode p = pcb->resUsing->head->next; p != NULL;) {
         pRCB rcb = p->rcb;
         p = p->next;
         findAndDelRCBNode(rcb, pcb->resUsing);
         rcb->isUse = NOTUSING;
-        reloadRCB(rcb);
+        reloadRCB(flag, rcb);
     }
 }
 
@@ -190,19 +193,27 @@ Status showAllPCB(pPCBList pReadyList, pPCBList pBlockedList, pPCBList pRunList,
     printf("\n");
 }
 
-Status scheduler(pPCBList pReadyList, pPCBList pBlockedList, pPCBList pRunList, pPCBList pFinishList) {
+Status scheduler(bool flag, pPCBList pReadyList, pPCBList pBlockedList, pPCBList pRunList, pPCBList pFinishList) {
     while (pReadyList->count != 0) {
-        runPCB(pReadyList, pBlockedList, pRunList);
+        runPCB(flag, pReadyList, pBlockedList, pRunList);
         showAllPCB(pReadyList, pBlockedList, pRunList, pFinishList);
-        finishPCB(pReadyList, pBlockedList, pRunList, pFinishList);
+        finishPCB(flag, pReadyList, pBlockedList, pRunList, pFinishList);
     }
     showAllPCB(pReadyList, pBlockedList, pRunList, pFinishList);
 }
 
-Status runPCB(pPCBList pReadyList, pPCBList pBlockedList, pPCBList pRunList) {
+Status runPCB(bool flag, pPCBList pReadyList, pPCBList pBlockedList, pPCBList pRunList) {
     int len = pReadyList->count;
     for (int i = 0; i < len; ++i) {
-        pPCB run = getMaxPriorityPCB(pReadyList);
+        pPCB run = NULL;
+        switch (flag) {
+            case PRIORITY:
+                run = getMaxPriorityPCB(pReadyList);
+                break;
+            case FIFO:
+                run = getFirstPriorityPCB(pReadyList);
+                break;
+        }
         removeFromReadyList(run, pReadyList);
         if (run->resRequest->count != 0) {
             addToBlockedList(run, pBlockedList);
@@ -212,9 +223,9 @@ Status runPCB(pPCBList pReadyList, pPCBList pBlockedList, pPCBList pRunList) {
     }
 }
 
-Status finishPCB(pPCBList pReadyList, pPCBList pBlockedList, pPCBList pRunList, pPCBList pFinishList) {
+Status finishPCB(bool flag, pPCBList pReadyList, pPCBList pBlockedList, pPCBList pRunList, pPCBList pFinishList) {
     for (pPCBNode p = pRunList->head->next; p != NULL; p = p->next) {
-        releaseResource(p->pcb);
+        releaseResource(flag, p->pcb);
         addToFinishList(p->pcb, pFinishList);
         removeFromRunList(p->pcb, pRunList);
     }

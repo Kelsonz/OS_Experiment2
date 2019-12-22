@@ -41,12 +41,11 @@ void exp() {
     createRCB(&R0, 4, rcbList);
 
     useRCB(A, R1);
-    useRCB(B, R2);
-    useRCB(B, R3);
     useRCB(A, R2);
     useRCB(A, R3);
+    useRCB(B, R2);
 
-    scheduler(readyList, blockedList, runList, finishList);
+    scheduler(PRIORITY, readyList, blockedList, runList, finishList);
 
     destroyPCB(&A);
     destroyRCB(&R1);

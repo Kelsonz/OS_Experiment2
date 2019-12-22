@@ -68,11 +68,19 @@ Status findAndDelRCBNode(pRCB rcb, pRCBList rcbList) {
     }
 }
 
-Status reloadRCB(pRCB rcb) {
+Status reloadRCB(bool flag, pRCB rcb) {
     if (rcb->waitPList->count == 0) {
         return OK;
     } else {
-        pPCB pcb = getMaxPriorityPCB(rcb->waitPList);
+        pPCB pcb = NULL;
+        switch (flag) {
+            case PRIORITY:
+                pcb = getMaxPriorityPCB(rcb->waitPList);
+                break;
+            case FIFO:
+                pcb = getFirstPriorityPCB(rcb->waitPList);
+                break;
+        }
         findAndDelPCBNode(pcb, rcb->waitPList);
         findAndDelRCBNode(rcb, pcb->resRequest);
         useRCB(pcb, rcb);
