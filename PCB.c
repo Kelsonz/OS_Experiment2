@@ -125,10 +125,11 @@ Status useRCB(pPCB pcb, pRCB rcb) {
 }
 
 Status releaseResource(pPCB pcb) {
-    for (pRCBNode p = pcb->resUsing->head->next; p != NULL; p = p->next) {
+    for (pRCBNode p = pcb->resUsing->head->next; p != NULL;) {
         pRCB rcb = p->rcb;
-        rcb->isUse = NOTUSING;
+        p = p->next;
         findAndDelRCBNode(rcb, pcb->resUsing);
+        rcb->isUse = NOTUSING;
         reloadRCB(rcb);
     }
 }
@@ -214,8 +215,8 @@ Status runPCB(pPCBList pReadyList, pPCBList pBlockedList, pPCBList pRunList) {
 Status finishPCB(pPCBList pReadyList, pPCBList pBlockedList, pPCBList pRunList, pPCBList pFinishList) {
     for (pPCBNode p = pRunList->head->next; p != NULL; p = p->next) {
         releaseResource(p->pcb);
-        removeFromRunList(p->pcb, pRunList);
         addToFinishList(p->pcb, pFinishList);
+        removeFromRunList(p->pcb, pRunList);
     }
     for (pPCBNode p = pBlockedList->head->next; p != NULL; p = p->next) {
         if (p->pcb->resRequest != 0) {

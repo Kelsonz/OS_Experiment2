@@ -73,10 +73,9 @@ Status reloadRCB(pRCB rcb) {
         return OK;
     } else {
         pPCB pcb = getMaxPriorityPCB(rcb->waitPList);
-        findAndDelRCBNode(rcb, pcb->resRequest);
-        addToResUsingList(pcb, rcb);
-        rcb->isUse = USING;
         findAndDelPCBNode(pcb, rcb->waitPList);
+        findAndDelRCBNode(rcb, pcb->resRequest);
+        useRCB(pcb, rcb);
     }
 }
 

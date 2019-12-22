@@ -24,7 +24,7 @@ void exp() {
     createPCBList(&blockedList);
     pRunList runList;
     createPCBList(&runList);
-    pBlockedList finishList;
+    pFinishList finishList;
     createPCBList(&finishList);
 
     pPCB A;
@@ -37,11 +37,14 @@ void exp() {
     createRCB(&R2, 2, rcbList);
     pRCB R3;
     createRCB(&R3, 3, rcbList);
+    pRCB R0;
+    createRCB(&R0, 4, rcbList);
 
     useRCB(A, R1);
+    useRCB(B, R2);
+    useRCB(B, R3);
     useRCB(A, R2);
     useRCB(A, R3);
-    useRCB(B, R1);
 
     scheduler(readyList, blockedList, runList, finishList);
 
