@@ -2,12 +2,12 @@
 // Created by 傅康 on 2019/12/20.
 //
 
-#ifndef OS_EXPERIMENT2_CB_H
-#define OS_EXPERIMENT2_CB_H
+#ifndef OS_EXPERIMENT2_EXP2_H
+#define OS_EXPERIMENT2_EXP2_H
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "LinkedList.h"
+
 //进程状态
 #define READY 10
 #define RUN 12
@@ -16,8 +16,12 @@
 //资源使用状态
 #define USING 21
 #define NOTUSING 22
-#define FIFO 1
-#define PRIORITY 2
+#define FIFO 23
+#define PRIORITY 24
+#define OK 1
+#define ERROR -1
+typedef int property;
+typedef int Status;
 typedef int bool;
 typedef struct status {
     property stausID;
@@ -96,17 +100,9 @@ pPCB getFirstPriorityPCB(pPCBList pcbList);
 //将进程移除进程队列
 Status findAndDelPCBNode(pPCB pcb, pPCBList list);
 
-//设置进程状态
-Status setStatus(pPCB pcb, property status);
-
-//获得进程状态
-property getStatus(pPCB pcb);
-
 //进程申请资源
 Status useRCB(pPCB pcb, pRCB rcb);
 
-//获得当前进程的优先级
-Status setPriority(pPCB pcb);
 
 //释放进程所有资源
 Status releaseResource(bool flag, pPCB pcb);
@@ -187,4 +183,4 @@ Status addToResRequest(pPCB pcb, pRCB rcb);
 Status showAllRCB(pRCBList list);
 
 
-#endif //OS_EXPERIMENT2_CB_H
+#endif //OS_EXPERIMENT2_EXP2_H

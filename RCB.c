@@ -1,13 +1,20 @@
 //
 // Created by 傅康 on 2019/12/13.
 //
-#include "CB.h"
+#include "exp2.h"
 
 Status createRCBList(pRCBList *list) {
     (*list) = (pRCBList) malloc(sizeof(RCBList));
+    if (!*list) {
+        return ERROR;
+    }
     (*list)->head = (pRCBNode) malloc(sizeof(RCBNode));
+    if (!(*list)->head) {
+        return ERROR;
+    }
     (*list)->head->next = NULL;
     (*list)->count = 0;
+    return OK;
 }
 
 Status destroyRCBList(pRCBList *list) {
@@ -18,10 +25,14 @@ Status destroyRCBList(pRCBList *list) {
         p = q;
     }
     free(p);
+    return OK;
 }
 
 Status insertRCB(pRCB p, pRCBList list) {
     RCBNode *pNode = (RCBNode *) malloc(sizeof(RCBNode));
+    if (!pNode) {
+        return ERROR;
+    }
     pNode->rcb = p;
     list->count++;
     if (list->count == 0) {
@@ -31,20 +42,26 @@ Status insertRCB(pRCB p, pRCBList list) {
         list->head->next = pNode;
         pNode->next = q;
     }
+    return OK;
 }
 
 Status createRCB(pRCB *p, property ID, pRCBList list) {
     (*p) = (pRCB) malloc(sizeof(RCB));
+    if (!(*p)) {
+        return ERROR;
+    }
     (*p)->ID = ID;
     (*p)->isUse = NOTUSING;
     createPCBList(&((*p)->waitPList));
     //加入资源列表
     insertRCB(*p, list);
+    return OK;
 }
 
 Status destroyRCB(pRCB *p) {
     destroyPCBList(&((*p)->waitPList));
     free(*p);
+    return OK;
 }
 
 Status findAndDelRCBNode(pRCB rcb, pRCBList rcbList) {
@@ -66,6 +83,7 @@ Status findAndDelRCBNode(pRCB rcb, pRCBList rcbList) {
             p = p->next;
         }
     }
+    return OK;
 }
 
 Status reloadRCB(bool flag, pRCB rcb) {
@@ -84,6 +102,7 @@ Status reloadRCB(bool flag, pRCB rcb) {
         findAndDelPCBNode(pcb, rcb->waitPList);
         findAndDelRCBNode(rcb, pcb->resRequest);
         useRCB(pcb, rcb);
+        return OK;
     }
 }
 

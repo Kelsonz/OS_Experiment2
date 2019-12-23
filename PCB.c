@@ -1,15 +1,20 @@
 //
 // Created by 傅康 on 2019/12/13.
 //
-#include "LinkedList.h"
-#include <time.h>
-#include "CB.h"
+#include "exp2.h"
 
 Status createPCBList(pPCBList *list) {
     (*list) = (pPCBList) malloc(sizeof(PCBList));
+    if (!(*list)) {
+        return ERROR;
+    }
     (*list)->head = (pPCBNode) malloc(sizeof(PCBNode));
+    if (!(*list)->head) {
+        return ERROR;
+    }
     (*list)->head->next = NULL;
     (*list)->count = 0;
+    return OK;
 }
 
 Status createPCB(pPCB *pcb, property ID, property priority, pPCBList pReadyList) {
@@ -24,17 +29,26 @@ Status createPCB(pPCB *pcb, property ID, property priority, pPCBList pReadyList)
     createRCBList(&((*pcb)->resUsing));
     createRCBList(&((*pcb)->resRequest));
     addToReadyList(*pcb, pReadyList);
-};
+    return OK;
+}
 
 Status createPCBStatus(pPCBStatus *pcbStatus) {
     (*pcbStatus) = (pPCBStatus) malloc(sizeof(PCBStatus));
+    if (!*pcbStatus) {
+        return ERROR;
+    }
     (*pcbStatus)->stausID = READY;
-};
+    return OK;
+}
 
 Status createPCBTree(pPCBTree *pcbTree) {
     (*pcbTree) = (pPCBTree) malloc(sizeof(PCBTree));
+    if (!*pcbTree) {
+        return ERROR;
+    }
     createPCBList(&((*pcbTree)->son));
-};
+    return OK;
+}
 
 Status destroyPCB(pPCB *pcb) {
     destroyPCBStatus(&((*pcb)->status));
@@ -42,16 +56,19 @@ Status destroyPCB(pPCB *pcb) {
     destroyRCBList(&((*pcb)->resUsing));
     destroyRCBList(&((*pcb)->resRequest));
     free(*pcb);
+    return OK;
 }
 
 
 Status destroyPCBStatus(pPCBStatus *pcbStatus) {
     free(*pcbStatus);
+    return OK;
 }
 
 Status destroyPCBTree(pPCBTree *pcbTree) {
     destroyPCBList(&((*pcbTree)->son));
     free(*pcbTree);
+    return OK;
 }
 
 Status destroyPCBList(pPCBList *pcbList) {
@@ -62,15 +79,20 @@ Status destroyPCBList(pPCBList *pcbList) {
         p = q;
     }
     free(p);
+    return OK;
 }
 
 Status insertPCB(pPCB p, pPCBList list) {
     PCBNode *pNode = (PCBNode *) malloc(sizeof(PCBNode));
+    if (!pNode) {
+        return ERROR;
+    }
     pNode->pcb = p;
-    list->count++;
     pPCBNode q = list->head->next;
     list->head->next = pNode;
     pNode->next = q;
+    list->count++;
+    return OK;
 }
 
 
@@ -84,20 +106,7 @@ Status findAndDelPCBNode(pPCB pcb, pPCBList list) {
             return OK;
         }
     }
-
-}
-
-Status setPriority(pPCB pcb) {
-    return pcb->priority;
-}
-
-Status setStatus(pPCB pcb, property status) {
-    pcb->status->stausID = status;
     return OK;
-}
-
-property getStatus(pPCB pcb) {
-    return pcb->status->stausID;
 }
 
 pPCB getMaxPriorityPCB(pPCBList list) {
@@ -125,6 +134,7 @@ Status useRCB(pPCB pcb, pRCB rcb) {
         rcb->isUse = USING;
         addToResUsingList(pcb, rcb);
     }
+    return OK;
 }
 
 Status releaseResource(bool flag, pPCB pcb) {
@@ -135,62 +145,63 @@ Status releaseResource(bool flag, pPCB pcb) {
         rcb->isUse = NOTUSING;
         reloadRCB(flag, rcb);
     }
+    return OK;
 }
 
 Status addToResUsingList(pPCB pcb, pRCB rcb) {
     insertRCB(rcb, pcb->resUsing);
+    return OK;
 }
 
 Status removeFromReadyList(pPCB pcb, pPCBList pReadyList) {
     findAndDelPCBNode(pcb, pReadyList);
+    return OK;
 }
 
 Status addToResRequest(pPCB pcb, pRCB rcb) {
     insertRCB(rcb, pcb->resRequest);
+    return OK;
 }
 
 Status removeFromBlockedList(pPCB pcb, pPCBList pBlockedList) {
     findAndDelPCBNode(pcb, pBlockedList);
+    return OK;
 }
 
 Status addToReadyList(pPCB pcb, pPCBList pReadyList) {
     pcb->status->stausID = READY;
     insertPCB(pcb, pReadyList);
+    return OK;
 }
 
 Status addToBlockedList(pPCB pcb, pPCBList pBlockedList) {
     pcb->status->stausID = BLOCKED;
     insertPCB(pcb, pBlockedList);
+    return OK;
 }
 
 Status addToRunList(pPCB pcb, pPCBList pRunList) {
     pcb->status->stausID = RUN;
     insertPCB(pcb, pRunList);
+    return OK;
 }
 
 Status removeFromRunList(pPCB pcb, pPCBList pRunList) {
     findAndDelPCBNode(pcb, pRunList);
+    return OK;
 }
 
 Status addToFinishList(pPCB pcb, pPCBList pFinishList) {
     pcb->status->stausID = FINISH;
     insertPCB(pcb, pFinishList);
+    return OK;
 }
 
 Status printPCBList(pPCBList list) {
     for (pPCBNode p = list->head->next; p != NULL; p = p->next) {
         printPCB(p->pcb);
     }
-}
-
-Status showAllPCB(pPCBList pReadyList, pPCBList pBlockedList, pPCBList pRunList, pPCBList pFinishList) {
-    printf("ID\t\tPriority\tstatus");
-    printf("\n");
-    printPCBList(pReadyList);
-    printPCBList(pRunList);
-    printPCBList(pBlockedList);
-    printPCBList(pFinishList);
-    printf("\n");
+    return OK;
 }
 
 Status scheduler(bool flag, pPCBList pReadyList, pPCBList pBlockedList, pPCBList pRunList, pPCBList pFinishList) {
@@ -200,6 +211,7 @@ Status scheduler(bool flag, pPCBList pReadyList, pPCBList pBlockedList, pPCBList
         finishPCB(flag, pReadyList, pBlockedList, pRunList, pFinishList);
     }
     showAllPCB(pReadyList, pBlockedList, pRunList, pFinishList);
+    return OK;
 }
 
 Status runPCB(bool flag, pPCBList pReadyList, pPCBList pBlockedList, pPCBList pRunList) {
@@ -221,6 +233,7 @@ Status runPCB(bool flag, pPCBList pReadyList, pPCBList pBlockedList, pPCBList pR
             addToRunList(run, pRunList);
         }
     }
+    return OK;
 }
 
 Status finishPCB(bool flag, pPCBList pReadyList, pPCBList pBlockedList, pPCBList pRunList, pPCBList pFinishList) {
@@ -230,11 +243,23 @@ Status finishPCB(bool flag, pPCBList pReadyList, pPCBList pBlockedList, pPCBList
         removeFromRunList(p->pcb, pRunList);
     }
     for (pPCBNode p = pBlockedList->head->next; p != NULL; p = p->next) {
-        if (p->pcb->resRequest != 0) {
+        if (p->pcb->resRequest->count == 0) {
             removeFromBlockedList(p->pcb, pBlockedList);
             addToReadyList(p->pcb, pReadyList);
         }
     }
+    return OK;
+}
+
+Status showAllPCB(pPCBList pReadyList, pPCBList pBlockedList, pPCBList pRunList, pPCBList pFinishList) {
+    printf("ID\t\tPriority\tstatus\t\tres_using\tres_req");
+    printf("\n");
+    printPCBList(pReadyList);
+    printPCBList(pRunList);
+    printPCBList(pBlockedList);
+    printPCBList(pFinishList);
+    printf("\n");
+    return OK;
 }
 
 Status printPCB(pPCB pcb) {
@@ -245,7 +270,7 @@ Status printPCB(pPCB pcb) {
             printf("READY");
             break;
         case RUN:
-            printf("RUN");
+            printf("RUN\t");
             break;
         case BLOCKED:
             printf("BLOCKED");
@@ -254,5 +279,27 @@ Status printPCB(pPCB pcb) {
             printf("FINISH");
             break;
     }
+    printf("\t\t");
+    if (pcb->resUsing->count == 0) {
+        printf("NULL\t\t");
+    } else {
+        for (pRCBNode p = pcb->resUsing->head->next; p != NULL;) {
+            pRCB rcb = p->rcb;
+            printf("%d ", rcb->ID);
+            p = p->next;
+        }
+        printf("\t\t");
+    }
+    if (pcb->resRequest->count == 0) {
+        printf("NULL\t\t");
+    } else {
+        for (pRCBNode p = pcb->resRequest->head->next; p != NULL;) {
+            pRCB rcb = p->rcb;
+            printf("%d ", rcb->ID);
+            p = p->next;
+        }
+        printf("\t\t");
+    }
     printf("\n");
+    return OK;
 }
