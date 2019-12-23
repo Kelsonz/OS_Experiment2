@@ -25,19 +25,20 @@ void exp() {
     createPCBList(&finishList);
 
     pPCB A;
-    createPCB(&A, 1, 1, readyList);
     pPCB B;
-    createPCB(&B, 2, 5, readyList);
     pPCB C;
+    createPCB(&A, 1, 1, readyList);
+    createPCB(&B, 2, 5, readyList);
     createPCB(&C, 3, 4, readyList);
-    pRCB R1;
-    createRCB(&R1, 1, rcbList);
-    pRCB R2;
-    createRCB(&R2, 2, rcbList);
-    pRCB R3;
-    createRCB(&R3, 3, rcbList);
+
     pRCB R0;
+    pRCB R1;
+    pRCB R2;
+    pRCB R3;
     createRCB(&R0, 4, rcbList);
+    createRCB(&R1, 1, rcbList);
+    createRCB(&R2, 2, rcbList);
+    createRCB(&R3, 3, rcbList);
 
     useRCB(C, R2);
     useRCB(A, R1);
@@ -48,5 +49,6 @@ void exp() {
     scheduler(PRIORITY, readyList, blockedList, runList, finishList);
 
     destroyPCB(&A);
+    destroyPCB(&B);
     destroyRCB(&R1);
 }

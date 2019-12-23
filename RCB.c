@@ -86,6 +86,18 @@ Status findAndDelRCBNode(pRCB rcb, pRCBList rcbList) {
     return OK;
 }
 
+//加入PCB资源使用队列
+Status addToResUsingList(pPCB pcb, pRCB rcb) {
+    insertRCB(rcb, pcb->resUsing);
+    return OK;
+}
+
+//加入PCB资源请求队列
+Status addToResRequest(pPCB pcb, pRCB rcb) {
+    insertRCB(rcb, pcb->resRequest);
+    return OK;
+}
+
 Status reloadRCB(bool flag, pRCB rcb) {
     if (rcb->waitPList->count == 0) {
         return OK;
